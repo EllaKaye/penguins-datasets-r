@@ -1,0 +1,540 @@
+---
+title: "Reproducing Gorman *et. al.* (2014)"
+author: Ella Kaye
+output: html_document
+---
+
+```{r setup}
+#| echo: false
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This report aims to reproduce key results in [Gorman *et. al.* (2014)](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0090081) (hereafter referred to as 'the paper'), 
+using the data in the [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/index.html) package.
+It's the `penguins_raw` data we need for this (rather than the simplified subset, `penguins`).
+
+## Preparing/sourcing the data
+
+I have prepared a version of the Palmer Penguins data with a view to incorporating it into the datasets package that comes with the base R distribution. 
+
+The script to do so is at <https://github.com/EllaKaye/penguins-datasets-r/blob/main/data-raw/penguins.R> and the corresponding data at <https://github.com/EllaKaye/penguins-datasets-r/blob/main/data/penguins.rda>, i.e. they are in this directory at "./data-raw/penguins.R" and "./data/penguins.rda". The data preparation scripts are similar to those in the palmerpenguins package, expect just using base R functions (at one point we thought this script might be incorporated into R's codebase). 
+
+The version of `penguins` for datasets is identical to `palmerpenguins:::penguins_df`, except for some different column names (In palmerpenguins, the exported `penguins` dataframe is identical to `penguins_df` if the user does not have the tibble package installed, and converted to a tibble if they do.)
+
+The version of `penguins_raw` for datasets is identical `palmerpenguins:::penguins_raw_df`, though without the "spec" attribute. 
+
+See <https://github.com/EllaKaye/penguins-datasets-r/blob/main/analysis/palmerpenguins-comparison.R> ("./analysis/palmerpenguins-comparison.R") for a comparison of our versions of `penguins` and `penguins_raw` and those in the palmerpenguins package.
+
+```{r}
+load(here::here("data", "penguins.rda"))
+```
+
+Sanity check that these versions match those in the palmerpenguins package (both the unexported `data.frame` versions, and, when converted, the exported `tibble` versions`:
+
+```{r}
+# penguins_raw are identical, 
+# except that datasets version doesn't have a spec attribute
+pp_penguins_raw_df <- palmerpenguins:::penguins_raw_df
+pp_penguins_raw <- palmerpenguins::penguins_raw
+attr(pp_penguins_raw_df, "spec") <- NULL
+attr(pp_penguins_raw, "spec") <- NULL
+identical(penguins_raw, pp_penguins_raw_df)
+identical(tibble::as_tibble(penguins_raw), pp_penguins_raw)
+```
+
+## Sample size and test/train split
+The paper states that "final sample sizes for study nests/individual adults of each species were $n=76/152$ for Adélie, $n=34/68$ for chinstrap, and $n=62/124$ for gentoo penguins." (Note that nest numbers are simply half of individual numbers).
+
+```{r, message = FALSE}
+library(tidyverse)
+penguins_raw |> 
+  count(Species)
+```
+
+Some of these individuals are excluded from the statistical analyses. 
+Some nests were not sampled if the pair had already reached clutch completion. 
+Also, some pairs were excluded because a final egg was never observed. 
+After exclusions, a 'truncated dataset' (2/3) of randomly chosen individuals was used as a training set to evaluate candidate models.
+The paper states the training sample sizes as Adélie $n=88$, chinstrap $n=36$, gentoo $n=74$.
+The remaining sampled penguins are included in the test set.
+The paper states the test sample sizes as Adélie $n=44$, chinstrap $n=18$, gentoo $n=38$.
+
+We can then confirm that the numbers in the training and test sets for each species match the sample sizes given in the paper, just using variables in the original dataset:
+
+```{r}
+penguins_raw |> 
+  filter(!is.na(Sex)) |> 
+  filter(`Clutch Completion` == "Yes") |> 
+  count(Species) |> 
+  mutate(training_n = floor(n*2/3),
+         test_n = n - training_n)
+```
+
+Gorman provided me with the sample numbers of the birds that were included in each of these.
+Below, I create an additional column in `penguins_raw` indicating which set (if any) the bird was in:
+
+```{r}
+ADPE_train_sample_nums <- c(
+  1, 2, 3, 5, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 31, 32, 33,
+  34, 41, 42, 43, 45, 46, 47, 49, 50, 52, 56, 57, 61, 62, 63, 64, 66, 67, 71,
+  73, 74, 76, 78, 81, 84, 85, 88, 89, 91, 92, 93, 94, 95, 96, 98, 99, 102, 
+  104, 105, 107, 108, 112, 113, 115, 116, 117, 118, 119, 120, 123, 124, 125, 
+  128, 129, 130, 133, 136, 138, 142, 143, 144, 145, 147, 148, 149, 150, 151, 
+  152
+)
+
+ADPE_test_sample_nums <- c(
+  6, 13, 15, 28, 35, 36, 37, 38, 44, 51, 53, 54, 55, 58, 59, 60, 65, 68, 72, 
+  75, 77, 79, 80, 82, 83, 86, 87, 90, 97, 100, 101, 103, 106, 109, 110, 111, 
+  114, 126, 127, 134, 135, 137, 141, 146
+)
+
+CHPE_train_sample_nums <- c(
+  3, 5, 6, 7, 8, 9, 13, 15, 16, 19, 22, 29, 30, 32, 33, 34, 35, 37, 41, 42, 
+  43, 45, 47, 48, 50, 52, 53, 54, 55, 56, 57, 58, 61, 63, 67, 68
+)
+
+CHPE_test_sample_nums <- c(4, 10, 11, 12, 14, 20, 21, 31, 36, 38, 44, 46, 49, 
+                           51, 59, 60, 62, 64)
+
+GEPE_train_sample_nums <- c(
+  2, 4, 5, 7, 9, 10, 13, 14, 15, 20, 21, 22, 24, 25, 26, 28, 30, 31, 32, 33, 
+  34, 35, 36, 37, 38, 39, 40, 44, 49, 50, 52, 53, 54, 55, 60, 62, 63, 64, 65, 
+  66, 69, 70, 73, 75, 76, 77, 78, 79, 82, 84, 85, 86, 89, 90, 91, 93, 94, 95, 
+  97, 98, 99, 101, 102, 103, 106, 109, 110, 112, 114, 115, 118, 121, 123, 124
+)
+
+GEPE_test_sample_nums <- c(
+  1, 3, 6, 8, 16, 17, 18, 19, 23, 29, 43, 45, 46, 51, 56, 57, 58, 59, 61, 68,
+  71, 72, 74, 80, 81, 83, 87, 88, 92, 96, 100, 104, 107, 108, 111, 113, 116,
+  122
+)
+
+# get count of each species
+n_Adelie <- sum(grepl("Adelie", penguins_raw$Species))
+n_Gentoo <- sum(grepl("Gentoo", penguins_raw$Species))
+n_Chinstrap <- sum(grepl("Chinstrap", penguins_raw$Species))
+
+# vector of train/test for each species, then together
+Adelie_set <- rep(NA, n_Adelie)
+Adelie_set[ADPE_train_sample_nums] <- "train"
+Adelie_set[ADPE_test_sample_nums] <- "test"
+Gentoo_set <- rep(NA, n_Gentoo)
+Gentoo_set[GEPE_train_sample_nums] <- "train"
+Gentoo_set[GEPE_test_sample_nums] <- "test"
+Chinstrap_set <- rep(NA, n_Chinstrap)
+Chinstrap_set[CHPE_train_sample_nums] <- "train"
+Chinstrap_set[CHPE_test_sample_nums] <- "test"
+Set <- c(Adelie_set, Gentoo_set, Chinstrap_set)
+
+# Add sample column to penguins_raw
+penguins_raw$Set <- Set
+```
+
+We can then also confirm the numbers in the training and test sets for each species from our additional `Set` column:
+
+```{r}
+penguins_raw |> 
+  count(Species, Set)
+```
+
+## Results
+
+Gorman provided me with her original analysis script, and the sections below present a slight refactoring of that.
+
+Some of the code blocks below are not displayed in this report, for example those in which functions are defined, but are visible in the [.Rmd file](https://github.com/EllaKaye/penguins-datasets-r/blob/main/analysis/Gorman_2014_reproduction.Rmd) from which this report is rendered ("./analysis/Gorman_2014_reproduction.Rmd").
+
+Here, I rename some columns to make them easier to refer to and create a factor for Sex called `Sex.2.M.F` (these colnames match the original files, and therefore make it easier to run Gorman's code).
+
+```{r}
+penguins_raw <- penguins_raw|> 
+  rename(Cul.L.mm = `Culmen Length (mm)`,
+         Cul.D.mm = `Culmen Depth (mm)`,
+         Flipper.L.mm = `Flipper Length (mm)`,
+         Mass.g = `Body Mass (g)`
+         ) |> 
+  mutate(Sex.2.M.F = ifelse(Sex == "MALE", 0, 1)) |> 
+  mutate(Sex.2.M.F = as.factor(Sex.2.M.F))
+```
+
+### Overdispersion
+
+Assess overdispersion in the most parameterised model: $\hat{c} =$ residual deviance/residual degrees of freedom.
+Paper gives figures for $\hat{c}$ as 0.37 for Adélies, 0.44 for chinstraps and 0.23 for gentoos, which we confirm below.
+
+```{r, echo = FALSE}
+c_hat <- function(species) {
+  data <- penguins_raw |> 
+      filter(Set == "train" & str_detect(Species, species))
+
+  Chat.gm <- glm(Sex.2.M.F~Cul.L.mm+Cul.D.mm+Flipper.L.mm+Mass.g, data=data, family=binomial)
+
+  Chat.resdev <- summary(Chat.gm)$deviance
+  Chat.rdf <- summary(Chat.gm)$df.residual
+  
+  Chat <- Chat.resdev/Chat.rdf
+  Chat   
+}
+```
+
+
+```{r}
+# c_hat function defined in chunk above, not visible in this report,
+# but the code can been viewed in the .Rmd file
+c_hat("Adelie")
+c_hat("Chinstrap")
+c_hat("Gentoo")
+```
+
+### Models for predicting sex
+
+In this section, we recreate the values in Table 1 of [Gorman et al (2014)](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0090081).
+
+First, define possible candidate models and coefficient names:
+
+```{r}
+ModelSet <-
+c(
+  "Sex.2.M.F~1", 
+  "Sex.2.M.F~Cul.L.mm", 
+  "Sex.2.M.F~Cul.D.mm",
+  "Sex.2.M.F~Flipper.L.mm", 
+  "Sex.2.M.F~Mass.g", 
+  "Sex.2.M.F~Cul.L.mm + Cul.D.mm",
+  "Sex.2.M.F~Cul.L.mm + Flipper.L.mm", 
+  "Sex.2.M.F~Cul.L.mm + Mass.g",
+  "Sex.2.M.F~Cul.D.mm + Flipper.L.mm", 
+  "Sex.2.M.F~Cul.D.mm + Mass.g",
+  "Sex.2.M.F~Flipper.L.mm + Mass.g",
+  "Sex.2.M.F~Cul.L.mm + Cul.D.mm + Flipper.L.mm",
+  "Sex.2.M.F~Cul.L.mm + Cul.D.mm + Mass.g",
+  "Sex.2.M.F~Cul.D.mm + Flipper.L.mm + Mass.g",
+  "Sex.2.M.F~Cul.L.mm + Cul.D.mm + Flipper.L.mm + Mass.g"
+)
+
+CoefName<- c("Intercept", "Intercept.SE", "Cul.L.mm", "Cul.L.mm.SE", 
+             "Cul.D.mm", "Cul.D.mm.SE", "Flipper.L.mm", "Flipper.L.mm.SE", 
+             "Mass.g", "Mass.g.SE")
+```
+
+A function to run the models and calculated some statistics from them, `make_AICModelMatrix()`, is then defined in a code chunk that is not printed in this report.
+
+```{r, echo = FALSE}
+make_AICModelMatrix <- function(species, ModelSet, CoefName) {
+  
+  data <- penguins_raw |> 
+    filter(Set == "train" & str_detect(Species, species))
+  
+  ModNull <- glm(Sex.2.M.F~1, data=data, family=binomial)
+  logLik.nm <- logLik(ModNull)
+  
+  # Create matrix to hold output from models
+  AICModelMatrix <- as.data.frame(matrix(
+    NA,
+    nrow = length(ModelSet),
+    ncol = length(CoefName) + 8,
+    dimnames = list(
+      c(1:length(ModelSet)),
+      c(
+        "Models",
+        CoefName,
+        "N.Obs",
+        "k.lr",
+        "logLik",
+        "Neg2logLik",
+        "r.squared.mf",
+        "AIC",
+        "AIC.c"
+        )
+      )
+    )
+  )
+  
+  ModelOutput <- list()
+  
+  for(i in 1:length(ModelSet)){
+    ModelOutput[[i]] <- glm(as.formula(ModelSet[i]), data=data, family=binomial)
+    m <- ModelOutput[[i]]
+    N.Obs <- nrow(data)
+    k.lr <- length(m$coef)
+    AIC <- AIC(m)
+    AIC.c <- AIC+(2*k.lr*(k.lr+1))/(N.Obs-k.lr-1)
+    AICModelMatrix[i,"Models"] <- ModelSet[i]
+    AICModelMatrix[i,"Intercept"] <- coef(m)["(Intercept)"]
+    AICModelMatrix[i,"Intercept.SE"] <- summary(m)$coef["(Intercept)",2]
+    AICModelMatrix[i,"Cul.L.mm"] <- coef(m)["Cul.L.mm"]
+    AICModelMatrix[i,"Cul.L.mm.SE"] <- summary(m)$coef[,2]["Cul.L.mm"]
+    AICModelMatrix[i,"Cul.D.mm"] <- coef(m)["Cul.D.mm"]
+    AICModelMatrix[i,"Cul.D.mm.SE"] <- summary(m)$coef[,2]["Cul.D.mm"]
+    AICModelMatrix[i,"Flipper.L.mm"] <- coef(m)["Flipper.L.mm"]
+    AICModelMatrix[i,"Flipper.L.mm.SE"] <- summary(m)$coef[,2]["Flipper.L.mm"]
+    AICModelMatrix[i,"Mass.g"] <- coef(m)["Mass.g"]
+    AICModelMatrix[i,"Mass.g.SE"] <- summary(m)$coef[,2]["Mass.g"]
+    AICModelMatrix[i,"N.Obs"] <- N.Obs
+    AICModelMatrix[i,"k.lr"] <- k.lr 
+    AICModelMatrix[i,"logLik"] <- logLik(m)
+    AICModelMatrix[i,"Neg2logLik"] <- -2*logLik(m)
+    AICModelMatrix[i,"r.squared.mf"] <- (1-(logLik(m)/(logLik.nm))) |> signif(2)
+    AICModelMatrix[i,"AIC"] <- AIC
+    AICModelMatrix[i,"AIC.c"] <- AIC.c
+  }
+  
+  deltaAIC.c <- (AICModelMatrix$AIC.c - min(AICModelMatrix$AIC.c)) |> signif(3)
+  lik.dAIC.c <- exp(-deltaAIC.c / 2)
+  AIC.c.W <- (lik.dAIC.c / (sum(lik.dAIC.c))) 
+  AICFinalMatrix <- data.frame(AICModelMatrix, deltaAIC.c, lik.dAIC.c, AIC.c.W)
+  AICFinalMatrix
+}
+```
+
+Run the function for each species:
+
+```{r}
+ADPE_AICModelMatrix <- make_AICModelMatrix("Adelie", ModelSet, CoefName)
+CHPE_AICModelMatrix <- make_AICModelMatrix("Chinstrap", ModelSet, CoefName)
+GEPE_AICModelMatrix <- make_AICModelMatrix("Gentoo", ModelSet, CoefName)
+```
+
+There then some code (again, not shown in report output, but viewable in the .Rmd file) to wrangle these into a reproduction of Table 1 (except % correctly classified), which displays the models that have $\Delta AICc \leq 2$:
+
+```{r echo = FALSE}
+ADPE_model_table <-
+  ADPE_AICModelMatrix |> 
+  mutate(species = "Adelie")
+
+CHPE_model_table <-
+  CHPE_AICModelMatrix |> 
+  mutate(species = "Chinstrap")
+
+GEPE_model_table <-
+  GEPE_AICModelMatrix |> 
+  mutate(species = "Gentoo")
+
+model_table <- bind_rows(ADPE_model_table, CHPE_model_table, GEPE_model_table)
+```
+
+```{r echo = FALSE}
+table_1_train <- model_table |> 
+  as_tibble() |> 
+  select(species, model = Models, n_par = k.lr, D.AICc = deltaAIC.c, w = AIC.c.W, r2.mf = r.squared.mf) |> 
+  #mutate(model = str_remove(model, "Sex.2.M.F~")) |> 
+  filter(D.AICc <= 2) |> 
+  arrange(species, D.AICc)  
+```
+
+```{r echo = FALSE}
+table_1_train |> 
+  mutate(model = str_remove(model, "Sex.2.M.F~")) |> 
+  mutate(w = round(w, 3))
+```
+Apart from what appears to be a slight difference in rounding the the McFadden's $R^2$ value for the Chinstrap and Gentoo penguins, these values match those in Table 1.
+
+For the final column of Table 1, we need to run the models on the test sets and get the predictions:
+
+```{r}
+correctly_classified <- function(model, species) {
+  data_train <- penguins_raw |> 
+      filter(Set == "train" & str_detect(Species, species))  
+  
+  data_test <- penguins_raw |> 
+    filter(Set == "test" & str_detect(Species, species))  
+  
+  mod <- glm(as.formula(model), data = data_train, family=binomial)
+  
+  data_test_pred <- 
+    data_test |> 
+    mutate(prediction = predict(mod, data_test, type="response")) |> 
+    mutate(prediction = ifelse(prediction > 0.5, 1, 0)) |> 
+    mutate(correct = Sex.2.M.F == prediction)
+  
+  mean(data_test_pred$correct)
+}
+```
+
+```{r}
+table_1_train |> 
+  select(species, model) |> 
+  summarise(pct_correct = correctly_classified(model, species),
+            .by = c(species, model)) |> 
+  mutate(pct_correct = scales::percent(pct_correct, 0.01)) |> 
+  mutate(model = str_remove(model, "Sex.2.M.F~")) 
+```
+These values match Table 1.
+
+### Parameter estimates and likelihoods
+
+In this section, we reproduce the statistics in Table 2 in Gorman et al (2014) (except the Size Dimorphism Index column). The code for the `make_table2()` function is included in the .Rmd file, but is not printed in the output of the report.
+
+```{r, echo = FALSE}
+make_table2 <- function(AIC_table) {
+  
+    CoefName <-
+    c(
+      "Intercept",
+      "Intercept.SE",
+      "Cul.L.mm",
+      "Cul.L.mm.SE",
+      "Cul.D.mm",
+      "Cul.D.mm.SE",
+      "Flipper.L.mm",
+      "Flipper.L..mmSE",
+      "Mass.g",
+      "Mass.g.SE"
+    )
+  
+  CoefName2 <-
+    c("Intercept",
+      "Cul.L.mm",
+      "Cul.D.mm",
+      "Flipper.L.mm",
+      "Mass.g")
+    
+  ## Parameter Likelihood
+  n <- length(CoefName2)
+  param_lik <- numeric(n)
+  
+  sum_AIC <- function(table) {
+    sum(table$AIC.c.W)
+  }
+
+  param_lik[1] <- sum_AIC(subset(AIC_table, !is.na(Intercept)))
+  param_lik[2] <- sum_AIC(subset(AIC_table, !is.na(Cul.L.mm)))
+  param_lik[3] <- sum_AIC(subset(AIC_table, !is.na(Cul.D.mm)))
+  param_lik[4] <- sum_AIC(subset(AIC_table, !is.na(Flipper.L.mm)))
+  param_lik[5] <- sum_AIC(subset(AIC_table, !is.na(Mass.g)))
+
+  names(param_lik) <- CoefName2
+  
+  ## Parameter estimates
+  # now turn NAs to 0
+  AIC_table[is.na(AIC_table)] <- 0
+  W.CoefName2 <- c("W.Intercept", "W.Cul.L.mm", "W.Cul.D.mm", "W.Flipper.L.mm", "W.Mass.g")
+  
+  nr <- nrow(AIC_table)
+  nc <- length(W.CoefName2)
+  
+  # Specify a vector for new W.ParaEst.
+  W.ParaEstMatrix <- as.data.frame(matrix(NA, nrow = nr, 
+                                         ncol = nc,
+                                         dimnames = list(1:nr, W.CoefName2)))
+
+  for(i in 1:nc) {
+    W.ParaEstMatrix[,i] <- AIC_table[CoefName2[i]] * AIC_table["AIC.c.W"]
+  }
+  
+  s.W.CoefName2 <- c("s.W.Intercept", "s.W.Cul.L.mm", "s.W.Cul.D.mm", "s.W.Flipper.L.mm", "s.W.Mass.g")
+  s.W.ParaEstMatrix1 <- as.data.frame(matrix(NA, nrow = nr, ncol = nc, 
+                                             dimnames=list(1:nr, s.W.CoefName2)))
+
+  for(i in 1:nc) {
+    s.W.ParaEstMatrix1[,i] <- sum(W.ParaEstMatrix[W.CoefName2[i]])
+  }
+  
+  s.W.ParaEst <- numeric(nc)
+  for(i in 1:nc) {
+    s.W.ParaEst[i] <- sum(W.ParaEstMatrix[W.CoefName2[i]])
+  }
+  
+  names(s.W.ParaEst) <- CoefName2
+  # parameter estimates
+  param_est <- s.W.ParaEst
+  
+  ## standard errors
+    #-----
+  # Calculate Weighted Parameter Estimate SEs (W.ParaEst.SE).
+  
+  # Specify a vector for DataSet2 Parameter SEs. These will be used to define the
+  # parameter SEs that will used to calculate W.ParaEst.SE that are caculated
+  # below in the loop. !!Don't forget to use . instead of : for interactions as
+  # this is how they are uploaded in DataSet2.
+  CoefName3 <-
+    c("Intercept.SE",
+      "Cul.L.mm.SE",
+      "Cul.D.mm.SE",
+      "Flipper.L.mm.SE",
+      "Mass.g.SE")
+  
+  # Specify a vector for new W.ParaEst.SE.
+  W.CoefName3.SE <-
+    c(
+      "W.Intercept.SE",
+      "W.Cul.L.mm.SE",
+      "W.Cul.D.mm.SE",
+      "W.Flipper.L.mm.SE",
+      "W.Mass.g.SE"
+    )
+  
+  # Create matrix to hold outputs for W.ParaEst.SE.
+  
+  # II. Weighted ParaEst.SE Matrix, ncol=8 includes all W.CoefName3.SE listed above.
+  W.ParaEst.SEMatrix <-
+    as.data.frame(matrix(
+      NA,
+      nrow = nrow(AIC_table),
+      ncol = length(W.CoefName3.SE),
+      dimnames = list(c(1:nrow(AIC_table)), c(W.CoefName3.SE))
+    ))
+  
+  # View W.ParaMatrix.
+  head(W.ParaEst.SEMatrix)
+  
+  # Run W.ParaEst.SE loop to create W.ParaEstSEs using the following equation W.SE
+  # = (AIC.c.W*(sqrt((ParaEst SE^2)+(ParaEst-summedWParaEst)^2)))
+  
+  for (j in 1:nrow(AIC_table)) {
+    for (i in 1:length(CoefName3)) {
+      if (AIC_table[j, CoefName3[i]] != 0) {
+        W.ParaEst.SEMatrix[j, i] <-
+          AIC_table$AIC.c.W[j] * (sqrt((AIC_table[j, CoefName3[i]]) ^ 2 + (AIC_table[j, CoefName2[i]] -
+                                                                             s.W.ParaEstMatrix1[j, i]) ^ 2))
+      } else {
+        W.ParaEst.SEMatrix[j, i] <- 0
+      }
+    }
+  }
+  
+  # View filled W.ParaEst.SEMatrix.
+  W.ParaEst.SEMatrix
+  
+  #----
+  # Summed W.ParaEst.SEs (Unconditional SEs)
+  # Specify a vector for summed W.ParaEsts.SEs.
+  s.W.CoefName3.SE <-
+    c(
+      "s.W.Intercept.SE",
+      "s.W.Cul.L.mm.SE",
+      "s.W.Cul.D.mm.SE",
+      "s.W.Flipper.L.mm.SE",
+      "s.W.Mass.g.SE"
+    )
+  
+  # Create matrix to hold outputs for summed W.ParaEst.SEs
+  
+  # III. Summed W.ParaEst.SE Matrix, ncol=8 includes all s.W.CoefNames2.SE listed above
+  s.W.ParaEst.SE <- numeric(n)
+  for (i in 1:n) {
+    s.W.ParaEst.SE[i] <- sum(W.ParaEst.SEMatrix[W.CoefName3.SE[i]])
+  }
+  
+  ## return
+  round(cbind(param_lik, param_est, SE = s.W.ParaEst.SE), 4)
+}
+```
+
+```{r}
+# Adelies
+make_table2(ADPE_AICModelMatrix)
+
+# Chinstrap
+make_table2(CHPE_AICModelMatrix)
+
+# Gentoo
+make_table2(GEPE_AICModelMatrix)
+```
+
+Other than some slight difference in rounding/choice of significant figures displayed in the original Table 2, these values match.
+
+## Conclusion
+In this report I have focused on Tables 1 and 2, since these are the tables that use just the variable in the `penguins` data frame, rather than the less-commonly used `penguins_raw`. I have used the `penguins_raw` data frame, though, because of the addition of the `Sample` column, though I don't expect that column to be of interest to anyone expect in the reproducing of Gorman *et. al.* (2014).
+
+Although I have not reproduced the entirety of Gorman *et. al.* (2014) here, I trust that what I have done is enough to convince the reader that the penguins data, as we propose to add to the **datasets** package that comes in the core R distribution, does indeed match the original, and that the paper is reproducible.

@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Ella Kaye">
+
+<title>Reproducing Gorman et. al. (2014)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Gorman_2014_reproduction_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Gorman_2014_reproduction_files/libs/quarto-html/quarto.js"></script>
+<script src="Gorman_2014_reproduction_files/libs/quarto-html/popper.min.js"></script>
+<script src="Gorman_2014_reproduction_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Gorman_2014_reproduction_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Gorman_2014_reproduction_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Gorman_2014_reproduction_files/libs/quarto-html/quarto-syntax-highlighting-29e2c20b02301cfff04dc8050bf30c7e.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Gorman_2014_reproduction_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Gorman_2014_reproduction_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Gorman_2014_reproduction_files/libs/bootstrap/bootstrap-e19dc0c07aeef78048e587c3f1edba7a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Reproducing Gorman <em>et. al.</em> (2014)</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Ella Kaye </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This report aims to reproduce key results in <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0090081">Gorman <em>et. al.</em> (2014)</a> (hereafter referred to as ‘the paper’), using the data in the <a href="https://allisonhorst.github.io/palmerpenguins/index.html">palmerpenguins</a> package. It’s the <code>penguins_raw</code> data we need for this (rather than the simplified subset, <code>penguins</code>).</p>
+<section id="preparingsourcing-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="preparingsourcing-the-data">Preparing/sourcing the data</h2>
+<p>I have prepared a version of the Palmer Penguins data with a view to incorporating it into the datasets package that comes with the base R distribution.</p>
+<p>The script to do so is at <a href="https://github.com/EllaKaye/penguins-datasets-r/blob/main/data-raw/penguins.R" class="uri">https://github.com/EllaKaye/penguins-datasets-r/blob/main/data-raw/penguins.R</a> and the corresponding data at <a href="https://github.com/EllaKaye/penguins-datasets-r/blob/main/data/penguins.rda" class="uri">https://github.com/EllaKaye/penguins-datasets-r/blob/main/data/penguins.rda</a>, i.e.&nbsp;they are in this directory at “./data-raw/penguins.R” and “./data/penguins.rda”. The data preparation scripts are similar to those in the palmerpenguins package, expect just using base R functions (at one point we thought this script might be incorporated into R’s codebase).</p>
+<p>The version of <code>penguins</code> for datasets is identical to <code>palmerpenguins:::penguins_df</code>, except for some different column names (In palmerpenguins, the exported <code>penguins</code> dataframe is identical to <code>penguins_df</code> if the user does not have the tibble package installed, and converted to a tibble if they do.)</p>
+<p>The version of <code>penguins_raw</code> for datasets is identical <code>palmerpenguins:::penguins_raw_df</code>, though without the “spec” attribute.</p>
+<p>See <a href="https://github.com/EllaKaye/penguins-datasets-r/blob/main/analysis/palmerpenguins-comparison.R" class="uri">https://github.com/EllaKaye/penguins-datasets-r/blob/main/analysis/palmerpenguins-comparison.R</a> (“./analysis/palmerpenguins-comparison.R”) for a comparison of our versions of <code>penguins</code> and <code>penguins_raw</code> and those in the palmerpenguins package.</p>
+<p>For this report, I’ve sourced the <code>penguins_raw</code> data from the working-version of my patch. Once incorporated into R, I’ll update the links below to the r-devel/r-svn mirror.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"penguins.rda"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Sanity check that these versions match those in the palmerpenguins package (both the unexported <code>data.frame</code> versions, and, when converted, the exported <code>tibble</code> versions`:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># penguins_raw are identical, </span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># except that datasets version doesn't have a spec attribute</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>pp_penguins_raw_df <span class="ot">&lt;-</span> palmerpenguins<span class="sc">:::</span>penguins_raw_df</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>pp_penguins_raw <span class="ot">&lt;-</span> palmerpenguins<span class="sc">::</span>penguins_raw</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(pp_penguins_raw_df, <span class="st">"spec"</span>) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(pp_penguins_raw, <span class="st">"spec"</span>) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(penguins_raw, pp_penguins_raw_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(tibble<span class="sc">::</span><span class="fu">as_tibble</span>(penguins_raw), pp_penguins_raw)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
+</section>
+<section id="sample-size-and-testtrain-split" class="level2">
+<h2 class="anchored" data-anchor-id="sample-size-and-testtrain-split">Sample size and test/train split</h2>
+<p>The paper states that “final sample sizes for study nests/individual adults of each species were <span class="math inline">\(n=76/152\)</span> for Adélie, <span class="math inline">\(n=34/68\)</span> for chinstrap, and <span class="math inline">\(n=62/124\)</span> for gentoo penguins.” (Note that nest numbers are simply half of individual numbers).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>penguins_raw <span class="sc">|&gt;</span> </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(Species)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                    Species   n
+1       Adelie Penguin (Pygoscelis adeliae) 152
+2 Chinstrap penguin (Pygoscelis antarctica)  68
+3         Gentoo penguin (Pygoscelis papua) 124</code></pre>
+</div>
+</div>
+<p>Some of these individuals are excluded from the statistical analyses. Some nests were not sampled if the pair had already reached clutch completion. Also, some pairs were excluded because a final egg was never observed. After exclusions, a ‘truncated dataset’ (2/3) of randomly chosen individuals was used as a training set to evaluate candidate models. The paper states the training sample sizes as Adélie <span class="math inline">\(n=88\)</span>, chinstrap <span class="math inline">\(n=36\)</span>, gentoo <span class="math inline">\(n=74\)</span>. The remaining sampled penguins are included in the test set. The paper states the test sample sizes as Adélie <span class="math inline">\(n=44\)</span>, chinstrap <span class="math inline">\(n=18\)</span>, gentoo <span class="math inline">\(n=38\)</span>.</p>
+<p>We can then confirm that the numbers in the training and test sets for each species match the sample sizes given in the paper, just using variables in the original dataset:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>penguins_raw <span class="sc">|&gt;</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Sex)) <span class="sc">|&gt;</span> </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="st">`</span><span class="at">Clutch Completion</span><span class="st">`</span> <span class="sc">==</span> <span class="st">"Yes"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(Species) <span class="sc">|&gt;</span> </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">training_n =</span> <span class="fu">floor</span>(n<span class="sc">*</span><span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>),</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">test_n =</span> n <span class="sc">-</span> training_n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                    Species   n training_n test_n
+1       Adelie Penguin (Pygoscelis adeliae) 132         88     44
+2 Chinstrap penguin (Pygoscelis antarctica)  54         36     18
+3         Gentoo penguin (Pygoscelis papua) 112         74     38</code></pre>
+</div>
+</div>
+<p>Gorman provided me with the sample numbers of the birds that were included in each of these. Below, I create an additional column in <code>penguins_raw</code> indicating which set (if any) the bird was in:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ADPE_train_sample_nums <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">14</span>, <span class="dv">16</span>, <span class="dv">17</span>, <span class="dv">18</span>, <span class="dv">19</span>, <span class="dv">20</span>, <span class="dv">21</span>, <span class="dv">22</span>, <span class="dv">23</span>, <span class="dv">24</span>, <span class="dv">25</span>, <span class="dv">26</span>, <span class="dv">27</span>, <span class="dv">31</span>, <span class="dv">32</span>, <span class="dv">33</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="dv">34</span>, <span class="dv">41</span>, <span class="dv">42</span>, <span class="dv">43</span>, <span class="dv">45</span>, <span class="dv">46</span>, <span class="dv">47</span>, <span class="dv">49</span>, <span class="dv">50</span>, <span class="dv">52</span>, <span class="dv">56</span>, <span class="dv">57</span>, <span class="dv">61</span>, <span class="dv">62</span>, <span class="dv">63</span>, <span class="dv">64</span>, <span class="dv">66</span>, <span class="dv">67</span>, <span class="dv">71</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="dv">73</span>, <span class="dv">74</span>, <span class="dv">76</span>, <span class="dv">78</span>, <span class="dv">81</span>, <span class="dv">84</span>, <span class="dv">85</span>, <span class="dv">88</span>, <span class="dv">89</span>, <span class="dv">91</span>, <span class="dv">92</span>, <span class="dv">93</span>, <span class="dv">94</span>, <span class="dv">95</span>, <span class="dv">96</span>, <span class="dv">98</span>, <span class="dv">99</span>, <span class="dv">102</span>, </span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="dv">104</span>, <span class="dv">105</span>, <span class="dv">107</span>, <span class="dv">108</span>, <span class="dv">112</span>, <span class="dv">113</span>, <span class="dv">115</span>, <span class="dv">116</span>, <span class="dv">117</span>, <span class="dv">118</span>, <span class="dv">119</span>, <span class="dv">120</span>, <span class="dv">123</span>, <span class="dv">124</span>, <span class="dv">125</span>, </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="dv">128</span>, <span class="dv">129</span>, <span class="dv">130</span>, <span class="dv">133</span>, <span class="dv">136</span>, <span class="dv">138</span>, <span class="dv">142</span>, <span class="dv">143</span>, <span class="dv">144</span>, <span class="dv">145</span>, <span class="dv">147</span>, <span class="dv">148</span>, <span class="dv">149</span>, <span class="dv">150</span>, <span class="dv">151</span>, </span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="dv">152</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>ADPE_test_sample_nums <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="dv">6</span>, <span class="dv">13</span>, <span class="dv">15</span>, <span class="dv">28</span>, <span class="dv">35</span>, <span class="dv">36</span>, <span class="dv">37</span>, <span class="dv">38</span>, <span class="dv">44</span>, <span class="dv">51</span>, <span class="dv">53</span>, <span class="dv">54</span>, <span class="dv">55</span>, <span class="dv">58</span>, <span class="dv">59</span>, <span class="dv">60</span>, <span class="dv">65</span>, <span class="dv">68</span>, <span class="dv">72</span>, </span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="dv">75</span>, <span class="dv">77</span>, <span class="dv">79</span>, <span class="dv">80</span>, <span class="dv">82</span>, <span class="dv">83</span>, <span class="dv">86</span>, <span class="dv">87</span>, <span class="dv">90</span>, <span class="dv">97</span>, <span class="dv">100</span>, <span class="dv">101</span>, <span class="dv">103</span>, <span class="dv">106</span>, <span class="dv">109</span>, <span class="dv">110</span>, <span class="dv">111</span>, </span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="dv">114</span>, <span class="dv">126</span>, <span class="dv">127</span>, <span class="dv">134</span>, <span class="dv">135</span>, <span class="dv">137</span>, <span class="dv">141</span>, <span class="dv">146</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>CHPE_train_sample_nums <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">7</span>, <span class="dv">8</span>, <span class="dv">9</span>, <span class="dv">13</span>, <span class="dv">15</span>, <span class="dv">16</span>, <span class="dv">19</span>, <span class="dv">22</span>, <span class="dv">29</span>, <span class="dv">30</span>, <span class="dv">32</span>, <span class="dv">33</span>, <span class="dv">34</span>, <span class="dv">35</span>, <span class="dv">37</span>, <span class="dv">41</span>, <span class="dv">42</span>, </span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  <span class="dv">43</span>, <span class="dv">45</span>, <span class="dv">47</span>, <span class="dv">48</span>, <span class="dv">50</span>, <span class="dv">52</span>, <span class="dv">53</span>, <span class="dv">54</span>, <span class="dv">55</span>, <span class="dv">56</span>, <span class="dv">57</span>, <span class="dv">58</span>, <span class="dv">61</span>, <span class="dv">63</span>, <span class="dv">67</span>, <span class="dv">68</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>CHPE_test_sample_nums <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">10</span>, <span class="dv">11</span>, <span class="dv">12</span>, <span class="dv">14</span>, <span class="dv">20</span>, <span class="dv">21</span>, <span class="dv">31</span>, <span class="dv">36</span>, <span class="dv">38</span>, <span class="dv">44</span>, <span class="dv">46</span>, <span class="dv">49</span>, </span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>                           <span class="dv">51</span>, <span class="dv">59</span>, <span class="dv">60</span>, <span class="dv">62</span>, <span class="dv">64</span>)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>GEPE_train_sample_nums <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">7</span>, <span class="dv">9</span>, <span class="dv">10</span>, <span class="dv">13</span>, <span class="dv">14</span>, <span class="dv">15</span>, <span class="dv">20</span>, <span class="dv">21</span>, <span class="dv">22</span>, <span class="dv">24</span>, <span class="dv">25</span>, <span class="dv">26</span>, <span class="dv">28</span>, <span class="dv">30</span>, <span class="dv">31</span>, <span class="dv">32</span>, <span class="dv">33</span>, </span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>  <span class="dv">34</span>, <span class="dv">35</span>, <span class="dv">36</span>, <span class="dv">37</span>, <span class="dv">38</span>, <span class="dv">39</span>, <span class="dv">40</span>, <span class="dv">44</span>, <span class="dv">49</span>, <span class="dv">50</span>, <span class="dv">52</span>, <span class="dv">53</span>, <span class="dv">54</span>, <span class="dv">55</span>, <span class="dv">60</span>, <span class="dv">62</span>, <span class="dv">63</span>, <span class="dv">64</span>, <span class="dv">65</span>, </span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>  <span class="dv">66</span>, <span class="dv">69</span>, <span class="dv">70</span>, <span class="dv">73</span>, <span class="dv">75</span>, <span class="dv">76</span>, <span class="dv">77</span>, <span class="dv">78</span>, <span class="dv">79</span>, <span class="dv">82</span>, <span class="dv">84</span>, <span class="dv">85</span>, <span class="dv">86</span>, <span class="dv">89</span>, <span class="dv">90</span>, <span class="dv">91</span>, <span class="dv">93</span>, <span class="dv">94</span>, <span class="dv">95</span>, </span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>  <span class="dv">97</span>, <span class="dv">98</span>, <span class="dv">99</span>, <span class="dv">101</span>, <span class="dv">102</span>, <span class="dv">103</span>, <span class="dv">106</span>, <span class="dv">109</span>, <span class="dv">110</span>, <span class="dv">112</span>, <span class="dv">114</span>, <span class="dv">115</span>, <span class="dv">118</span>, <span class="dv">121</span>, <span class="dv">123</span>, <span class="dv">124</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>GEPE_test_sample_nums <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">8</span>, <span class="dv">16</span>, <span class="dv">17</span>, <span class="dv">18</span>, <span class="dv">19</span>, <span class="dv">23</span>, <span class="dv">29</span>, <span class="dv">43</span>, <span class="dv">45</span>, <span class="dv">46</span>, <span class="dv">51</span>, <span class="dv">56</span>, <span class="dv">57</span>, <span class="dv">58</span>, <span class="dv">59</span>, <span class="dv">61</span>, <span class="dv">68</span>,</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>  <span class="dv">71</span>, <span class="dv">72</span>, <span class="dv">74</span>, <span class="dv">80</span>, <span class="dv">81</span>, <span class="dv">83</span>, <span class="dv">87</span>, <span class="dv">88</span>, <span class="dv">92</span>, <span class="dv">96</span>, <span class="dv">100</span>, <span class="dv">104</span>, <span class="dv">107</span>, <span class="dv">108</span>, <span class="dv">111</span>, <span class="dv">113</span>, <span class="dv">116</span>,</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>  <span class="dv">122</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a><span class="co"># get count of each species</span></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>n_Adelie <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">grepl</span>(<span class="st">"Adelie"</span>, penguins_raw<span class="sc">$</span>Species))</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>n_Gentoo <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">grepl</span>(<span class="st">"Gentoo"</span>, penguins_raw<span class="sc">$</span>Species))</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>n_Chinstrap <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">grepl</span>(<span class="st">"Chinstrap"</span>, penguins_raw<span class="sc">$</span>Species))</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a><span class="co"># vector of train/test for each species, then together</span></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>Adelie_set <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, n_Adelie)</span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>Adelie_set[ADPE_train_sample_nums] <span class="ot">&lt;-</span> <span class="st">"train"</span></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>Adelie_set[ADPE_test_sample_nums] <span class="ot">&lt;-</span> <span class="st">"test"</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>Gentoo_set <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, n_Gentoo)</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>Gentoo_set[GEPE_train_sample_nums] <span class="ot">&lt;-</span> <span class="st">"train"</span></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>Gentoo_set[GEPE_test_sample_nums] <span class="ot">&lt;-</span> <span class="st">"test"</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>Chinstrap_set <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, n_Chinstrap)</span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>Chinstrap_set[CHPE_train_sample_nums] <span class="ot">&lt;-</span> <span class="st">"train"</span></span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>Chinstrap_set[CHPE_test_sample_nums] <span class="ot">&lt;-</span> <span class="st">"test"</span></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>Set <span class="ot">&lt;-</span> <span class="fu">c</span>(Adelie_set, Gentoo_set, Chinstrap_set)</span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a><span class="co"># Add sample column to penguins_raw</span></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>penguins_raw<span class="sc">$</span>Set <span class="ot">&lt;-</span> Set</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can then also confirm the numbers in the training and test sets for each species from our additional <code>Set</code> column:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>penguins_raw <span class="sc">|&gt;</span> </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(Species, Set)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                    Species   Set  n
+1       Adelie Penguin (Pygoscelis adeliae)  test 44
+2       Adelie Penguin (Pygoscelis adeliae) train 88
+3       Adelie Penguin (Pygoscelis adeliae)  &lt;NA&gt; 20
+4 Chinstrap penguin (Pygoscelis antarctica)  test 18
+5 Chinstrap penguin (Pygoscelis antarctica) train 36
+6 Chinstrap penguin (Pygoscelis antarctica)  &lt;NA&gt; 14
+7         Gentoo penguin (Pygoscelis papua)  test 38
+8         Gentoo penguin (Pygoscelis papua) train 74
+9         Gentoo penguin (Pygoscelis papua)  &lt;NA&gt; 12</code></pre>
+</div>
+</div>
+</section>
+<section id="results" class="level2">
+<h2 class="anchored" data-anchor-id="results">Results</h2>
+<p>Gorman provided me with her original analysis script, and the sections below present a slight refactoring of that.</p>
+<p>Some of the code blocks below are not displayed in this report, for example those in which functions are defined, but are visible in the <a href="https://github.com/EllaKaye/penguins-datasets-r/blob/main/analysis/Gorman_2014_reproduction.Rmd">.Rmd file</a> from which this report is rendered (“./analysis/Gorman_2014_reproduction.Rmd”).</p>
+<p>Here, I rename some columns to make them easier to refer to and create a factor for Sex called <code>Sex.2.M.F</code> (these colnames match the original files, and therefore make it easier to run Gorman’s code).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>penguins_raw <span class="ot">&lt;-</span> penguins_raw<span class="sc">|&gt;</span> </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Cul.L.mm =</span> <span class="st">`</span><span class="at">Culmen Length (mm)</span><span class="st">`</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">Cul.D.mm =</span> <span class="st">`</span><span class="at">Culmen Depth (mm)</span><span class="st">`</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">Flipper.L.mm =</span> <span class="st">`</span><span class="at">Flipper Length (mm)</span><span class="st">`</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">Mass.g =</span> <span class="st">`</span><span class="at">Body Mass (g)</span><span class="st">`</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>         ) <span class="sc">|&gt;</span> </span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Sex.2.M.F =</span> <span class="fu">ifelse</span>(Sex <span class="sc">==</span> <span class="st">"MALE"</span>, <span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Sex.2.M.F =</span> <span class="fu">as.factor</span>(Sex.<span class="fl">2.</span>M.F))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="overdispersion" class="level3">
+<h3 class="anchored" data-anchor-id="overdispersion">Overdispersion</h3>
+<p>Assess overdispersion in the most parameterised model: <span class="math inline">\(\hat{c} =\)</span> residual deviance/residual degrees of freedom. Paper gives figures for <span class="math inline">\(\hat{c}\)</span> as 0.37 for Adélies, 0.44 for chinstraps and 0.23 for gentoos, which we confirm below.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># c_hat function defined in chunk above, not visible in this report,</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># but the code can been viewed in the .Rmd file</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c_hat</span>(<span class="st">"Adelie"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.3722571</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c_hat</span>(<span class="st">"Chinstrap"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.4404487</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c_hat</span>(<span class="st">"Gentoo"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.2282778</code></pre>
+</div>
+</div>
+</section>
+<section id="models-for-predicting-sex" class="level3">
+<h3 class="anchored" data-anchor-id="models-for-predicting-sex">Models for predicting sex</h3>
+<p>In this section, we recreate the values in Table 1 of <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0090081">Gorman et al (2014)</a>.</p>
+<p>First, define possible candidate models and coefficient names:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>ModelSet <span class="ot">&lt;-</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Sex.2.M.F~1"</span>, </span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Sex.2.M.F~Cul.L.mm"</span>, </span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Sex.2.M.F~Cul.D.mm"</span>,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Sex.2.M.F~Flipper.L.mm"</span>, </span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Sex.2.M.F~Mass.g"</span>, </span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Sex.2.M.F~Cul.L.mm + Cul.D.mm"</span>,</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Sex.2.M.F~Cul.L.mm + Flipper.L.mm"</span>, </span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Sex.2.M.F~Cul.L.mm + Mass.g"</span>,</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Sex.2.M.F~Cul.D.mm + Flipper.L.mm"</span>, </span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Sex.2.M.F~Cul.D.mm + Mass.g"</span>,</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Sex.2.M.F~Flipper.L.mm + Mass.g"</span>,</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Sex.2.M.F~Cul.L.mm + Cul.D.mm + Flipper.L.mm"</span>,</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Sex.2.M.F~Cul.L.mm + Cul.D.mm + Mass.g"</span>,</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Sex.2.M.F~Cul.D.mm + Flipper.L.mm + Mass.g"</span>,</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Sex.2.M.F~Cul.L.mm + Cul.D.mm + Flipper.L.mm + Mass.g"</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>CoefName<span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Intercept"</span>, <span class="st">"Intercept.SE"</span>, <span class="st">"Cul.L.mm"</span>, <span class="st">"Cul.L.mm.SE"</span>, </span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>             <span class="st">"Cul.D.mm"</span>, <span class="st">"Cul.D.mm.SE"</span>, <span class="st">"Flipper.L.mm"</span>, <span class="st">"Flipper.L.mm.SE"</span>, </span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>             <span class="st">"Mass.g"</span>, <span class="st">"Mass.g.SE"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>A function to run the models and calculated some statistics from them, <code>make_AICModelMatrix()</code>, is then defined in a code chunk that is not printed in this report.</p>
+<p>Run the function for each species:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>ADPE_AICModelMatrix <span class="ot">&lt;-</span> <span class="fu">make_AICModelMatrix</span>(<span class="st">"Adelie"</span>, ModelSet, CoefName)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>CHPE_AICModelMatrix <span class="ot">&lt;-</span> <span class="fu">make_AICModelMatrix</span>(<span class="st">"Chinstrap"</span>, ModelSet, CoefName)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>GEPE_AICModelMatrix <span class="ot">&lt;-</span> <span class="fu">make_AICModelMatrix</span>(<span class="st">"Gentoo"</span>, ModelSet, CoefName)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>There then some code (again, not shown in report output, but viewable in the .Rmd file) to wrangle these into a reproduction of Table 1 (except % correctly classified), which displays the models that have <span class="math inline">\(\Delta AICc \leq 2\)</span>:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 6
+  species   model                                       n_par D.AICc     w r2.mf
+  &lt;chr&gt;     &lt;chr&gt;                                       &lt;int&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 Adelie    Cul.L.mm + Cul.D.mm + Mass.g                    4  0     0.392  0.73
+2 Adelie    Cul.L.mm + Mass.g                               3  0.48  0.308  0.71
+3 Adelie    Cul.L.mm + Cul.D.mm + Flipper.L.mm + Mass.g     5  0.539 0.299  0.75
+4 Chinstrap Cul.L.mm + Cul.D.mm                             3  0     0.374  0.69
+5 Gentoo    Cul.L.mm + Cul.D.mm + Mass.g                    4  0     0.528  0.84</code></pre>
+</div>
+</div>
+<p>Apart from what appears to be a slight difference in rounding the the McFadden’s <span class="math inline">\(R^2\)</span> value for the Chinstrap and Gentoo penguins, these values match those in Table 1.</p>
+<p>For the final column of Table 1, we need to run the models on the test sets and get the predictions:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>correctly_classified <span class="ot">&lt;-</span> <span class="cf">function</span>(model, species) {</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  data_train <span class="ot">&lt;-</span> penguins_raw <span class="sc">|&gt;</span> </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>      <span class="fu">filter</span>(Set <span class="sc">==</span> <span class="st">"train"</span> <span class="sc">&amp;</span> <span class="fu">str_detect</span>(Species, species))  </span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  data_test <span class="ot">&lt;-</span> penguins_raw <span class="sc">|&gt;</span> </span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(Set <span class="sc">==</span> <span class="st">"test"</span> <span class="sc">&amp;</span> <span class="fu">str_detect</span>(Species, species))  </span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(<span class="fu">as.formula</span>(model), <span class="at">data =</span> data_train, <span class="at">family=</span>binomial)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  data_test_pred <span class="ot">&lt;-</span> </span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    data_test <span class="sc">|&gt;</span> </span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">prediction =</span> <span class="fu">predict</span>(mod, data_test, <span class="at">type=</span><span class="st">"response"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">prediction =</span> <span class="fu">ifelse</span>(prediction <span class="sc">&gt;</span> <span class="fl">0.5</span>, <span class="dv">1</span>, <span class="dv">0</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">correct =</span> Sex.<span class="fl">2.</span>M.F <span class="sc">==</span> prediction)</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(data_test_pred<span class="sc">$</span>correct)</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>table_1_train <span class="sc">|&gt;</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(species, model) <span class="sc">|&gt;</span> </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">pct_correct =</span> <span class="fu">correctly_classified</span>(model, species),</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">.by =</span> <span class="fu">c</span>(species, model)) <span class="sc">|&gt;</span> </span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pct_correct =</span> scales<span class="sc">::</span><span class="fu">percent</span>(pct_correct, <span class="fl">0.01</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">model =</span> <span class="fu">str_remove</span>(model, <span class="st">"Sex.2.M.F~"</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 3
+  species   model                                       pct_correct
+  &lt;chr&gt;     &lt;chr&gt;                                       &lt;chr&gt;      
+1 Adelie    Cul.L.mm + Cul.D.mm + Mass.g                88.64%     
+2 Adelie    Cul.L.mm + Mass.g                           88.64%     
+3 Adelie    Cul.L.mm + Cul.D.mm + Flipper.L.mm + Mass.g 88.64%     
+4 Chinstrap Cul.L.mm + Cul.D.mm                         94.44%     
+5 Gentoo    Cul.L.mm + Cul.D.mm + Mass.g                89.47%     </code></pre>
+</div>
+</div>
+<p>These values match Table 1.</p>
+</section>
+<section id="parameter-estimates-and-likelihoods" class="level3">
+<h3 class="anchored" data-anchor-id="parameter-estimates-and-likelihoods">Parameter estimates and likelihoods</h3>
+<p>In this section, we reproduce the statistics in Table 2 in Gorman et al (2014) (except the Size Dimorphism Index column). The code for the <code>make_table2()</code> function is included in the .Rmd file, but is not printed in the output of the report.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Adelies</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make_table2</span>(ADPE_AICModelMatrix)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>             param_lik param_est      SE
+Intercept       1.0000   77.2061 23.3831
+Cul.L.mm        0.9997   -1.0437  0.3376
+Cul.D.mm        0.6915   -0.5827  0.4113
+Flipper.L.mm    0.2995    0.0277  0.0291
+Mass.g          1.0000   -0.0086  0.0025</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Chinstrap</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make_table2</span>(CHPE_AICModelMatrix)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>             param_lik param_est      SE
+Intercept       1.0000   88.8589 37.1590
+Cul.L.mm        0.8164   -0.6871  0.3675
+Cul.D.mm        0.8410   -2.0067  1.0716
+Flipper.L.mm    0.4068   -0.1205  0.1301
+Mass.g          0.3279    0.0015  0.0023</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Gentoo</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make_table2</span>(GEPE_AICModelMatrix)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>             param_lik param_est      SE
+Intercept       1.0000  138.7607 57.3486
+Cul.L.mm        0.7387   -0.7220  0.4604
+Cul.D.mm        0.9538   -3.0472  1.4956
+Flipper.L.mm    0.2980   -0.0241  0.0792
+Mass.g          0.9996   -0.0106  0.0043</code></pre>
+</div>
+</div>
+<p>Other than some slight difference in rounding/choice of significant figures displayed in the original Table 2, these values match.</p>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>In this report I have focused on Tables 1 and 2, since these are the tables that use just the variable in the <code>penguins</code> data frame, rather than the less-commonly used <code>penguins_raw</code>. I have used the <code>penguins_raw</code> data frame, though, because of the addition of the <code>Sample</code> column, though I don’t expect that column to be of interest to anyone expect in the reproducing of Gorman <em>et. al.</em> (2014).</p>
+<p>Although I have not reproduced the entirety of Gorman <em>et. al.</em> (2014) here, I trust that what I have done is enough to convince the reader that the penguins data, as we propose to add to the <strong>datasets</strong> package that comes in the core R distribution, does indeed match the original, and that the paper is reproducible.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
