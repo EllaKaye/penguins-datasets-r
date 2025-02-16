@@ -5,15 +5,15 @@ The `penguins` and `penguins_raw` datasets in the [palmerpenguins R package](htt
 With a view to adding these to the datasets package that is included in the base R distribution, 
 this project contains the following:
 
-- "./data-raw/penguins.R": a script to create `penguins` and `penguins_raw`, 
+- `"./data-raw/penguins.R"`: a script to create `penguins` and `penguins_raw`, 
 from the data made available through the [Environmental Data Initiative](https://edirepository.org).
-- "./data/penguins.rda": the data file created from running "./data-raw/penguins.R"
-- "./man/penguins.Rd": A documentation file for the `penguins` and `penguins_raw` datasets
-- "./analysis/palmerpenguins-comparison.R": A script comparing our versions of `penguins` and `penguins_raw` with those in the palmerpenguins package.
-- "./analysis/Gorman_2014_reproduction.Rmd": A computational notebook reproducing Tables 1 and 2 from Gorman *et. al.* (2014)
-- "./analysis/Gorman_2014_reproduction.html": The result of rendering the above-mentioned notebook to html
+- `"./data/penguins.rda"`: the data file created from running "./data-raw/penguins.R"
+- `"./man/penguins.Rd"`: A documentation file for the `penguins` and `penguins_raw` datasets
+- `"./analysis/palmerpenguins-comparison.R"`: A script comparing our versions of `penguins` and `penguins_raw` with those in the palmerpenguins package.
+- `"./analysis/Gorman_2014_reproduction.Rmd"`: A computational notebook reproducing Tables 1 and 2 from Gorman *et. al.* (2014)
+- `"./analysis/Gorman_2014_reproduction.html"`: The result of rendering the above-mentioned notebook to html
 
-It is out intention to upload this project to Zenodo, to create a DOI, that can then be referenced in `penguins.Rd` when the data is incorporated into base R.
+It is our intention to upload this project to Zenodo, to create a DOI, that can then be referenced in `penguins.Rd` when the data is incorporated into base R.
 
 ## References
 
