@@ -106,8 +106,23 @@ penguins_raw
   and a notebook reproducing results from \bibcite{Gorman \abbr{et al.}\sspace(2014)}.
 }
 \examples{
+## look at them a bit
+str(penguins)
+summary(penguins)
+str(penguins_raw)
+## not really useful b/c of the many character ones:
+summary(penguins_raw)
+## make it interesting by "factorizing" the data frame:
+dFactor <- function(dat) { dat[] <- lapply(dat, \(.)
+if(is.character(.)) as.factor(.) else .); dat }
+summary(dFactor(penguins_raw))
+
 mosaicplot( ~ species + island,       data = penguins)
 mosaicplot( ~ species + island + sex, data = penguins)
+
+op <- options(width = max(107, getOption("width")))
+symnum(is.na(penguins),     symbols = c(".", "N"), abbr.colnames = 7)
+symnum(is.na(penguins_raw), symbols = c(".", "N"), abbr.colnames = 5)
 
 ## Produce the long variable names as from {palmerpenguins} pkg:
 long_nms <- sub("len", "length_mm",
