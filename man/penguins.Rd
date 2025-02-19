@@ -88,6 +88,10 @@ penguins_raw
   Palmer Archipelago Penguins Data in the palmerpenguins R Package 
   - An Alternative to Anderson's Irises.
   \emph{R Journal} \bold{14}, 1; \doi{10.32614/RJ-2022-020}.
+
+  Kaye, E., Turner, H., Gorman, K. B., Horst, A. M. and Hill, A. P. (2025)
+  Preparing the Palmer Penguins data for the datasets package in R. 
+  \doi{DOI}.
 }
 \note{
   This data is also available in the \CRANpkg{palmerpenguins} package.  See
@@ -97,7 +101,7 @@ penguins_raw
   This version of the data uses some shorter variable names, 
   for compact data display. 
 
-  (REF Kaye BIBCITE - see gait) provides the scripts used to create
+  \bibcite{Kaye \abbr{et al.}\sspace(2025)} provides the scripts used to create
   these data sets from the original source data, 
   and a notebook reproducing results from \bibcite{Gorman \abbr{et al.}\sspace(2014)}.
 }
