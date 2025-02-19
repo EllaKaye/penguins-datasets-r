@@ -1,7 +1,11 @@
 ---
-title: "Reproducing Gorman *et. al.* (2014)"
-author: Ella Kaye
-output: html_document
+title: "Reproducing Gorman *et al.* (2014)"
+author: 
+  - Ella Kaye
+  - Heather Turner
+output: 
+  html_document:
+    code_folding: show
 ---
 
 ```{r setup}
@@ -9,21 +13,22 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-This report aims to reproduce key results in [Gorman *et. al.* (2014)](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0090081) (hereafter referred to as 'the paper'), 
-using the data in the [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/index.html) package.
-It's the `penguins_raw` data we need for this (rather than the simplified subset, `penguins`).
+This report aims to reproduce key results in [Gorman *et al.* (2014)](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0090081) (hereafter referred to as 'the paper').
+
+The [.Rmd file](https://github.com/EllaKaye/penguins-datasets-r/blob/main/analysis/Gorman_2014_reproduction.Rmd) from which this report is rendered is in the directory at `"./analysis/Gorman_2014_reproduction.Rmd"`.
 
 ## Preparing/sourcing the data
+The Palmer Penguins data has previously been made available in the R package [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/index.html) package.
 
-I have prepared a version of the Palmer Penguins data with a view to incorporating it into the datasets package that comes with the base R distribution. 
+We have prepared a version of the Palmer Penguins data with a view to incorporating it into the datasets package that comes with the base R distribution, and this is what we use in this report. 
 
-The script to do so is at <https://github.com/EllaKaye/penguins-datasets-r/blob/main/data-raw/penguins.R> and the corresponding data at <https://github.com/EllaKaye/penguins-datasets-r/blob/main/data/penguins.rda>, i.e. they are in this directory at "./data-raw/penguins.R" and "./data/penguins.rda". The data preparation scripts are similar to those in the palmerpenguins package, expect just using base R functions (at one point we thought this script might be incorporated into R's codebase). 
+The script to do so is at <https://github.com/EllaKaye/penguins-datasets-r/blob/main/data-raw/penguins.R> and the corresponding data at <https://github.com/EllaKaye/penguins-datasets-r/blob/main/data/penguins.rda>, i.e. they are in this directory at `"./data-raw/penguins.R"` and `"./data/penguins.rda"`. The data preparation scripts are similar to those in the palmerpenguins package, expect just using base R functions (at one point we thought this script might be incorporated into R's codebase). 
 
 The version of `penguins` for datasets is identical to `palmerpenguins:::penguins_df`, except for some different column names (In palmerpenguins, the exported `penguins` dataframe is identical to `penguins_df` if the user does not have the tibble package installed, and converted to a tibble if they do.)
 
 The version of `penguins_raw` for datasets is identical `palmerpenguins:::penguins_raw_df`, though without the "spec" attribute. 
 
-See <https://github.com/EllaKaye/penguins-datasets-r/blob/main/analysis/palmerpenguins-comparison.R> ("./analysis/palmerpenguins-comparison.R") for a comparison of our versions of `penguins` and `penguins_raw` and those in the palmerpenguins package.
+See <https://github.com/EllaKaye/penguins-datasets-r/blob/main/analysis/palmerpenguins-comparison.R> (`"./analysis/palmerpenguins-comparison.R"`) for a comparison of our versions of `penguins` and `penguins_raw` and those in the palmerpenguins package.
 
 ```{r}
 load(here::here("data", "penguins.rda"))
@@ -71,9 +76,9 @@ penguins_raw |>
 ```
 
 Gorman provided me with the sample numbers of the birds that were included in each of these.
-Below, I create an additional column in `penguins_raw` indicating which set (if any) the bird was in:
+Below, I create an additional column, `Set`, in `penguins_raw` indicating which set (if any) the bird was in (click 'Show' to view):
 
-```{r}
+```{r class.source = 'fold-hide'}
 ADPE_train_sample_nums <- c(
   1, 2, 3, 5, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 31, 32, 33,
   34, 41, 42, 43, 45, 46, 47, 49, 50, 52, 56, 57, 61, 62, 63, 64, 66, 67, 71,
@@ -142,9 +147,7 @@ penguins_raw |>
 
 Gorman provided me with her original analysis script, and the sections below present a slight refactoring of that.
 
-Some of the code blocks below are not displayed in this report, for example those in which functions are defined, but are visible in the [.Rmd file](https://github.com/EllaKaye/penguins-datasets-r/blob/main/analysis/Gorman_2014_reproduction.Rmd) from which this report is rendered ("./analysis/Gorman_2014_reproduction.Rmd").
-
-Here, I rename some columns to make them easier to refer to and create a factor for Sex called `Sex.2.M.F` (these colnames match the original files, and therefore make it easier to run Gorman's code).
+Here, we rename some columns to make them easier to refer to and create a factor for Sex called `Sex.2.M.F` (these colnames match the original files, and therefore make it easier to run Gorman's code).
 
 ```{r}
 penguins_raw <- penguins_raw|> 
@@ -162,7 +165,9 @@ penguins_raw <- penguins_raw|>
 Assess overdispersion in the most parameterised model: $\hat{c} =$ residual deviance/residual degrees of freedom.
 Paper gives figures for $\hat{c}$ as 0.37 for Adélies, 0.44 for chinstraps and 0.23 for gentoos, which we confirm below.
 
-```{r, echo = FALSE}
+A function to calculate $\hat{c}$ (click 'Show' to view):
+
+```{r, class.source = 'fold-hide'}
 c_hat <- function(species) {
   data <- penguins_raw |> 
       filter(Set == "train" & str_detect(Species, species))
@@ -179,8 +184,7 @@ c_hat <- function(species) {
 
 
 ```{r}
-# c_hat function defined in chunk above, not visible in this report,
-# but the code can been viewed in the .Rmd file
+# c_hat function defined in chunk above
 c_hat("Adelie")
 c_hat("Chinstrap")
 c_hat("Gentoo")
@@ -190,9 +194,9 @@ c_hat("Gentoo")
 
 In this section, we recreate the values in Table 1 of [Gorman et al (2014)](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0090081).
 
-First, define possible candidate models and coefficient names:
+First, define possible candidate models and coefficient names (click 'Show' to view):
 
-```{r}
+```{r class.source = 'fold-hide'}
 ModelSet <-
 c(
   "Sex.2.M.F~1", 
@@ -217,9 +221,9 @@ CoefName<- c("Intercept", "Intercept.SE", "Cul.L.mm", "Cul.L.mm.SE",
              "Mass.g", "Mass.g.SE")
 ```
 
-A function to run the models and calculated some statistics from them, `make_AICModelMatrix()`, is then defined in a code chunk that is not printed in this report.
+A function to run the models and calculated some statistics from them, `make_AICModelMatrix()` (click 'Show' to view): 
 
-```{r, echo = FALSE}
+```{r, class.source = 'fold-hide'}
 make_AICModelMatrix <- function(species, ModelSet, CoefName) {
   
   data <- penguins_raw |> 
@@ -295,9 +299,9 @@ CHPE_AICModelMatrix <- make_AICModelMatrix("Chinstrap", ModelSet, CoefName)
 GEPE_AICModelMatrix <- make_AICModelMatrix("Gentoo", ModelSet, CoefName)
 ```
 
-There then some code (again, not shown in report output, but viewable in the .Rmd file) to wrangle these into a reproduction of Table 1 (except % correctly classified), which displays the models that have $\Delta AICc \leq 2$:
+Code to wrangle these into a reproduction of Table 1 (except % correctly classified), which displays the models that have $\Delta AICc \leq 2$ (click 'Show' to view):
 
-```{r echo = FALSE}
+```{r class.source = 'fold-hide'}
 ADPE_model_table <-
   ADPE_AICModelMatrix |> 
   mutate(species = "Adelie")
@@ -311,22 +315,19 @@ GEPE_model_table <-
   mutate(species = "Gentoo")
 
 model_table <- bind_rows(ADPE_model_table, CHPE_model_table, GEPE_model_table)
-```
 
-```{r echo = FALSE}
 table_1_train <- model_table |> 
   as_tibble() |> 
   select(species, model = Models, n_par = k.lr, D.AICc = deltaAIC.c, w = AIC.c.W, r2.mf = r.squared.mf) |> 
   #mutate(model = str_remove(model, "Sex.2.M.F~")) |> 
   filter(D.AICc <= 2) |> 
   arrange(species, D.AICc)  
-```
 
-```{r echo = FALSE}
 table_1_train |> 
   mutate(model = str_remove(model, "Sex.2.M.F~")) |> 
   mutate(w = round(w, 3))
 ```
+
 Apart from what appears to be a slight difference in rounding the the McFadden's $R^2$ value for the Chinstrap and Gentoo penguins, these values match those in Table 1.
 
 For the final column of Table 1, we need to run the models on the test sets and get the predictions:
@@ -359,13 +360,16 @@ table_1_train |>
   mutate(pct_correct = scales::percent(pct_correct, 0.01)) |> 
   mutate(model = str_remove(model, "Sex.2.M.F~")) 
 ```
+
 These values match Table 1.
 
 ### Parameter estimates and likelihoods
 
-In this section, we reproduce the statistics in Table 2 in Gorman et al (2014) (except the Size Dimorphism Index column). The code for the `make_table2()` function is included in the .Rmd file, but is not printed in the output of the report.
+In this section, we reproduce the statistics in Table 2 in Gorman et al (2014) (except the Size Dimorphism Index column). 
 
-```{r, echo = FALSE}
+The code for the `make_table2()` function (click 'Show' to view):
+
+```{r, class.source = 'fold-hide'}
 make_table2 <- function(AIC_table) {
   
     CoefName <-
@@ -535,6 +539,6 @@ make_table2(GEPE_AICModelMatrix)
 Other than some slight difference in rounding/choice of significant figures displayed in the original Table 2, these values match.
 
 ## Conclusion
-In this report I have focused on Tables 1 and 2, since these are the tables that use just the variable in the `penguins` data frame, rather than the less-commonly used `penguins_raw`. I have used the `penguins_raw` data frame, though, because of the addition of the `Sample` column, though I don't expect that column to be of interest to anyone expect in the reproducing of Gorman *et. al.* (2014).
+In this report we have focused on Tables 1 and 2, since these are the tables that use just the variables in the `penguins` data frame, rather than the less-commonly used `penguins_raw`. 
 
-Although I have not reproduced the entirety of Gorman *et. al.* (2014) here, I trust that what I have done is enough to convince the reader that the penguins data, as we propose to add to the **datasets** package that comes in the core R distribution, does indeed match the original, and that the paper is reproducible.
+Although we have not reproduced the entirety of Gorman *et al.* (2014) here, we trust that what we have done is enough to convince the reader that the penguins data, as we propose to add to the **datasets** package that comes in the core R distribution, does indeed match the original, and that the paper is reproducible.
