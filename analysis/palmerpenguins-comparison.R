@@ -18,12 +18,12 @@ all.equal(
 
 # We're using shorter names, so to check data is identical, 
 # put revert to palmerpenguins::penguins colnames
-old_nms <- sub("len", "length_mm",
+long_nms <- sub("len", "length_mm",
                sub("dep","depth_mm",
                    sub("mass", "mass_g", colnames(penguins))))
 
 # compare colnames
-noquote(rbind(old_nms, nms = colnames(penguins)))
+noquote(rbind(long_nms, nms = colnames(penguins)))
 
-colnames(penguins) <- old_nms
+colnames(penguins) <- long_nms
 identical(penguins, palmerpenguins:::penguins_df) # TRUE
