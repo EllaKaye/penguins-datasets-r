@@ -13,7 +13,7 @@ from the data made available through the [Environmental Data Initiative](https:/
 - `"./analysis/Gorman_2014_reproduction.Rmd"`: A computational notebook reproducing Tables 1 and 2 from Gorman *et. al.* (2014)
 - `"./analysis/Gorman_2014_reproduction.html"`: The result of rendering the above-mentioned notebook to html
 
-It is our intention to upload this project to Zenodo, to create a DOI, that can then be referenced in `penguins.Rd` when the data is incorporated into base R.
+The repo is uploaded to Zenodo, with DOI 10.5281/zenodo.14902740, and referenced in `penguins.Rd`.
 
 ## References
 
