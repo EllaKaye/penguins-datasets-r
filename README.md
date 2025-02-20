@@ -1,4 +1,4 @@
-# Preparing the Palmer Penguins data for the datasets package in R
+# Preparing the Palmer Penguins Data for the *datasets* Package in R
 
 The `penguins` and `penguins_raw` datasets in the [palmerpenguins R package](https://allisonhorst.github.io/palmerpenguins/) have become popular for data exploration and visualisation, particularly in an educational context.
 
