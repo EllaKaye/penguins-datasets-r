@@ -93,7 +93,7 @@ penguins_raw
 
   Kaye, E., Turner, H., Gorman, K. B., Horst, A. M. and Hill, A. P. (2025)
   Preparing the Palmer Penguins Data for the \pkg{datasets} Package in R. 
-  \doi{DOI}.
+  \doi{10.5281/zenodo.14902740}.
 }
 \details{
   \bibcite{Gorman \abbr{et al.}\sspace(2014)}
