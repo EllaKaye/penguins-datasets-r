@@ -1,8 +1,8 @@
 ---
 title: "Reproducing Gorman *et al.* (2014)"
 author: 
-  - Ella Kaye
-  - Heather Turner
+  - Ella Kaye, The University of Warwick
+  - Heather Turner, The University of Warwick
 output: 
   html_document:
     code_folding: show
