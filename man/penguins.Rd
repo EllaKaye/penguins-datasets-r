@@ -123,8 +123,8 @@ dFactor <- function(dat) {
 summary(dFactor(penguins_raw))
 
 ## visualise distribution across factors
-mosaicplot( ~ species + island,       data = penguins)
-mosaicplot( ~ species + island + sex, data = penguins)
+plot(island ~ species, data = penguins)
+plot(sex ~ interaction(island, species, sep = "\n"), data = penguins)
 
 ## bill depth vs. length by species (color) and sex (symbol):
 ## positive correlations for all species, males tend to have bigger bills
