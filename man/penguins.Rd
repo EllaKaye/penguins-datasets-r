@@ -21,8 +21,10 @@ penguins_raw
 \format{
   \code{penguins} is a data frame with 344 rows and 8 variables:
   \describe{
-    \item{\code{species}}{\code{\link{factor}}, with levels \code{Adelie}, \code{Chinstrap}, and \code{Gentoo}}
-    \item{\code{island}}{\code{factor}, with levels \code{Biscoe}, \code{Dream}, and \code{Torgersen})}
+    \item{\code{species}}{\code{\link{factor}}, with levels 
+      \code{Adelie}, \code{Chinstrap}, and \code{Gentoo}}
+    \item{\code{island}}{\code{factor}, 
+      with levels \code{Biscoe}, \code{Dream}, and \code{Torgersen})}
     \item{\code{bill_len}}{\code{\link{numeric}}, bill length (millimeters)}
     \item{\code{bill_dep}}{\code{numeric}, bill depth (millimeters)}
     \item{\code{flipper_len}}{\code{\link{integer}}, flipper length (millimeters)}
@@ -31,8 +33,9 @@ penguins_raw
     \item{\code{year}}{\code{integer}, study year: 2007, 2008, or 2009}
   }
 
-  \code{penguins_raw} is a data frame with 344 rows and 17 variables. 8 columns correspond to columns in \code{penguins}, though with different variable names
-  and/or classes:
+  \code{penguins_raw} is a data frame with 344 rows and 17 variables. 
+  8 columns correspond to columns in \code{penguins}, 
+  though with different variable names and/or classes:
   \describe{
     \item{\code{Species}}{\code{character}}
     \item{\code{Island}}{\code{character}}
@@ -52,8 +55,8 @@ penguins_raw
     \item{\code{Region}}{\code{character}, the region of Palmer LTER sampling grid}
     \item{\code{Stage}}{\code{character}, denoting reproductive stage at sampling}
     \item{\code{Individual ID}}{\code{character}, unique ID for each individual in dataset}
-    \item{\code{Clutch Completion}}{\code{character}, if the study nest was observed with a full clutch, 
-      i.e., 2 eggs}
+    \item{\code{Clutch Completion}}{\code{character}, 
+      if the study nest was observed with a full clutch, i.e., 2 eggs}
     \item{\code{Delta 15 N (o/oo)}}{\code{numeric}, the ratio of stable isotopes 15N:14N}
     \item{\code{Delta 13 C (o/oo)}}{\code{numeric}, the ratio of stable isotopes 13C:12C}
     \item{\code{Comments}}{\code{character}, additional relevant information}
@@ -96,17 +99,17 @@ penguins_raw
   \bibcite{Gorman \abbr{et al.}\sspace(2014)}
   used the data to study sex dimorphism separately for the three species.
 
-  \bibcite{Horst \abbr{et al.}\sspace(2022)} popularized the data as an illustration for
-  different statistical methods, as an alternative to the \code{\link{iris}} data.
+  \bibcite{Horst \abbr{et al.}\sspace(2022)} popularized the data as an illustration 
+  for different statistical methods, as an alternative to the \code{\link{iris}} data.
 
   \bibcite{Kaye \abbr{et al.}\sspace(2025)} provide the scripts used to create
   these data sets from the original source data, 
   and a notebook reproducing results from \bibcite{Gorman \abbr{et al.}\sspace(2014)}.
 }
 \note{
-  These data sets are also available in the \CRANpkg{palmerpenguins} package.  See
-  the \href{https://allisonhorst.github.io/palmerpenguins/}{package website} for further
-  details and resources.
+  These data sets are also available in the \CRANpkg{palmerpenguins} package.  
+  See the \href{https://allisonhorst.github.io/palmerpenguins/}{package website} 
+  for further details and resources.
 
   The \code{penguins} data has some shorter variable names than the \bold{palmerpenguins} version, 
   for compact code and data display. 
